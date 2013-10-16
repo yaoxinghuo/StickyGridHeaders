@@ -393,6 +393,7 @@ public class StickyGridHeadersGridView extends GridView implements OnScrollListe
 
                         final PerformHeaderClick performHeaderClick = mPerformHeaderClick;
                         performHeaderClick.mClickMotionPosition = mMotionHeaderPosition;
+                        performHeaderClick.mEventX = (int)ev.getX();;
                         performHeaderClick.rememberWindowAttachCount();
 
                         if (mTouchMode == TOUCH_MODE_DOWN || mTouchMode == TOUCH_MODE_TAP) {
@@ -445,13 +446,13 @@ public class StickyGridHeadersGridView extends GridView implements OnScrollListe
         return super.onTouchEvent(ev);
     }
 
-    public boolean performHeaderClick(View view, long id) {
+    public boolean performHeaderClick(View view, long id, int eventX) {
         if (mOnHeaderClickListener != null) {
             playSoundEffect(SoundEffectConstants.CLICK);
             if (view != null) {
                 view.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
             }
-            mOnHeaderClickListener.onHeaderClick(this, view, id);
+            mOnHeaderClickListener.onHeaderClick(this, view, id, eventX);
             return true;
         }
 
@@ -1070,7 +1071,7 @@ public class StickyGridHeadersGridView extends GridView implements OnScrollListe
     }
 
     public interface OnHeaderClickListener {
-        void onHeaderClick(AdapterView<?> parent, View view, long id);
+        void onHeaderClick(AdapterView<?> parent, View view, long id, int eventX);
     }
 
     public interface OnHeaderLongClickListener {
@@ -1101,6 +1102,7 @@ public class StickyGridHeadersGridView extends GridView implements OnScrollListe
 
     private class PerformHeaderClick extends WindowRunnable implements Runnable {
         int mClickMotionPosition;
+        int mEventX;
 
         @Override
         public void run() {
@@ -1117,7 +1119,7 @@ public class StickyGridHeadersGridView extends GridView implements OnScrollListe
                 // probably scrolled off the screen, and we should cancel the
                 // click.
                 if (view != null) {
-                    performHeaderClick(view, headerViewPositionToId(mClickMotionPosition));
+                    performHeaderClick(view, headerViewPositionToId(mClickMotionPosition), mEventX);
                 }
             }
         }
